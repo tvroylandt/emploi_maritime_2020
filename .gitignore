@@ -1,0 +1,11 @@
+.Rhistory
+.RData
+.Rproj.user
+
+
+doc/
+data/
+mail/
+methodologie/filtres_init
+output/
+prog/prog_regions
