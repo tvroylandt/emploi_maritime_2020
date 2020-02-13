@@ -25,14 +25,14 @@ perimetre_naf <-
       "skip",
       "skip"
     ),
-    col_names = c("naf732", "famille_mer", "type_secteur"),
+    col_names = c("naf732", "famille_mer", "type_metier"),
     skip = 1
   ) %>%
   filter(!is.na(naf732)) %>%
-  select(naf732, famille_mer, type_secteur) %>%
-  mutate(type_secteur = fct_recode(type_secteur,
-                                   "Coeur" = "1",
-                                   "Transverse" = "2"))
+  select(naf732, famille_mer, type_metier) %>%
+  mutate(type_metier = fct_recode(type_metier,
+                                  "Coeur" = "1",
+                                  "Transverse" = "2"))
 
 # Export
 write_xlsx(perimetre_naf,
@@ -40,27 +40,6 @@ write_xlsx(perimetre_naf,
 
 # Filtres ROME ------------------------------------------------------------
 # Import des périmètres
-# perimetre1 <-
-#   read_xls(
-#     "methodologie/filtres_init/Regroupements de ROME-Appellations_JCCMA.XLS",
-#     skip = 1,
-#     col_names = c("apl_rome", "rome", "famille_mer"),
-#     col_types = c("text", "text", "skip", "skip", "text")
-#   ) %>%
-#   mutate(perimetre1 = "1")
-#
-# perimetre2 <-
-#   read_sas("methodologie/filtres_init/rome_appelations_mer.sas7bdat") %>%
-#   rename(
-#     apl_rome = appromv3,
-#     rome = ROMEV3,
-#     famille_mer = Famille,
-#     type_metier = INDICATEUR
-#   ) %>%
-#   select(rome, apl_rome, famille_mer, type_metier) %>%
-#   mutate(perimetre2 = "1",
-#          type_metier = as.character(type_metier))
-
 perimetre_rome <-
   read_xlsx(
     "methodologie/filtres_init/Aquitaine_Liste codes NAF Appellations ROME et cantons retenus.xlsx",
@@ -120,12 +99,25 @@ shp_commune <-
   st_read("methodologie/referentiels/FR_COMMUNE_DOM_IDF_2019.shp") %>%
   filter(zoom_idf == "0")
 
+# Table de passage commune -> canton
+passage_commune_cv <-
+  read_xls("methodologie/referentiels/table-appartenance-geo-communes-19.xls",
+           skip = 5) %>%
+  select(CODGEO, CV, REG, DEP) %>%
+  rename_all(tolower)
+
+# Shapefiles CV
+shp_canton <- shp_commune %>%
+  left_join(passage_commune_cv %>% select(codgeo, cv),
+            by = c("code_com" = "codgeo")) %>%
+  group_by(cv, code_dep, code_reg) %>%
+  summarise()
+
 # périmètre cv
 perimetre_cv <-
   read_xlsx("methodologie/filtres/perimetre_maritime_cantons.xlsx")
 
+
 # fusion
 shp_canton_littoral <- shp_canton %>%
   left_join(perimetre_cv, by = c("cv"))
-
-
