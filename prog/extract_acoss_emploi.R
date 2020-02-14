@@ -24,7 +24,7 @@ df_acoss_propre <- df_acoss_init %>%
     code_com = str_sub(commune, 1, 5),
     naf = paste0(str_sub(ape, 1, 2), str_sub(ape, 4, 6)),
     code_dep = if_else(
-      str_sub(code_com, 1, 3) == "97",
+      str_sub(code_com, 1, 2) == "97",
       str_sub(code_com, 1, 3),
       str_sub(code_com, 1, 2)
     )

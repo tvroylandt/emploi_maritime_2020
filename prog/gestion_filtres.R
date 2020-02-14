@@ -121,3 +121,4 @@ perimetre_cv <-
 # fusion
 shp_canton_littoral <- shp_canton %>%
   left_join(perimetre_cv, by = c("cv"))
+

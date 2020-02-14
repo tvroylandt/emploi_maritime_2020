@@ -2,10 +2,10 @@
 /* - Emploi maritime - Compétences techniques offres */
 /* ---------------------------------------------------- */
 
-* filtre de la table competence -> on transposera en local ;
+* filtre de la table competence sur les métiers maritimes ;
 proc sql;
 	create table comp_offre_maritime_2019 as
-		select 
+		select cats(a.KC_MOISSTATISTIQUE, "_", a.KC_OFFRE, "_", a.KC_NATUREENREGDETAILLEE_ID) as cle_ident,
 			  a.DC_ROMEV3_ID as rome, 
 			  a.DC_APPELATIONROMEV3_ID as aplrome,
 			  a.DN_NBOFFRENATUREDETAILLEE as nbroff, 
@@ -58,5 +58,14 @@ proc sql;
 	          a.DC_SPECIFICITE39 as specif39, 
 	          a.DC_SPECIFICITE40 as specif40
 		from ntz_secu.doe_comp_offre_2019 as a left join userlib.perimetre_maritime_rome as b
-			on a.dc_romev3_id = b.rome;
+			on a.dc_romev3_id = b.rome and a.DC_APPELATIONROMEV3_ID = b.apl_rome
+		where b.famille_mer ne ""
+		order by calculated cle_ident,
+				a.DC_ROMEV3_ID,
+				a.DC_APPELATIONROMEV3_ID,
+				b.famille_mer,
+				b.type_metier ,
+				calculated region ,
+				a.DC_COMMUNE_ETABLISSEMENT_ID,
+				a.DN_NBOFFRENATUREDETAILLEE;
 quit;
