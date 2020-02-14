@@ -1,0 +1,162 @@
+---
+output: github_document
+---
+
+# Analyse de l'emploi et du marché du travail maritime - version 2019
+
+```{r packages, include=FALSE}
+library(tidyverse)
+library(sf)
+library(knitr)
+library(here)
+```
+
+
+## Constitution des familles de métiers/secteurs
+
++ Métiers : à partir des appellations ROME, une liste de 936 appellations reliée à l'emploi maritime a été constituée et ventilée en 10 familles.
+
++ Secteurs : 54 NAF ont été selectionnés et ventilés selon les 10 mêmes familles.
+
+Ces nomenclatures sont identiques à celles utilisées dans l'étude 2019, sur 2018.
+
+## Zones littorales
+
+A partir d'une nomenclature des cantons-villes de l'Insee, une liste des zones "littorales" a été constituée, puis validée au niveau régional.
+
+```{r map_littoral, include=FALSE}
+shp_canton_littoral <-
+  st_read(here("methodologie/referentiels/FR_CANTON_LITTORAL.shp"), quiet = TRUE)
+
+ggplot(shp_canton_littoral) +
+  geom_sf(aes(fill = littoral),
+          size = 0.5) +
+  scale_fill_viridis_d(option = "magma") +
+  guides(fill = FALSE) +
+  theme_void()
+```
+
+Selon les sources de données, certaines familles sont filtrées afin de ne les prendre en compte que pour les zones littorales.
+
+## Sources de données
+
+Sont mobilisées :
+
+```{r sources, include=FALSE}
+tibble(
+  source = c(
+    "Emploi salarié Acoss",
+    "Offres collectées",
+    "Compétences offres",
+    "Embauches - DPAE",
+    "DEFM",
+    "Entrées en formation"
+  ),
+  remarque = c(
+    "hors Mayotte où la population-mère BMO prend le relai + hors Défense et administation maritimes + de fait hors MSA, ce qui sous-estime Pêche et cultures marines",
+    "",
+    "",
+    "",
+    "En moyenne sur 12 mois",
+    ""
+  ),
+  temporalite = c(
+    "2019",
+    "2019",
+    "2019",
+    "2019",
+    "2019",
+    "Octobre 2018 - septembre 2019"
+  ),
+  selection = c("NAF", "ROME", "ROME", "NAF", "ROME", "Formacode")
+) %>%
+  kable("html")
+```
+
+En fonction des sources de données et des familles, des filtres peuvent être effectués pour restreindre uniquement sur le littoral.
+
+```{r sources_filtre, include=FALSE}
+tibble::tribble(
+  ~ Famille,
+  ~ Emploi.Acoss,
+  ~ DPAE,
+  ~ Offres,
+  ~ Offres.compétences,
+  ~ DEFM,
+  ~ Formation,
+  "Activités et loisirs littoraux",
+  "Littoral",
+  "Littoral",
+  "Littoral",
+  "Littoral",
+  "Littoral",
+  "X",
+  "Construction et maintenance navale",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "Défense et adminstrations maritimes",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "Hôtellerie-restauration",
+  "Littoral",
+  "Littoral",
+  "Littoral",
+  "Littoral",
+  "Littoral",
+  "X",
+  "Pêche et cultures marines",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "Personnel embarqué",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "R&D et ingénierie maritime",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "Services portuaires et nautiques",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "Transformation des produits de la mer",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "X",
+  "Travaux en mer",
+  "Littoral",
+  "Littoral",
+  "Littoral",
+  "Littoral",
+  "X",
+  "X"
+) %>%
+  kable("html")
+
+```
+
+

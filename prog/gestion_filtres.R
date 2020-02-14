@@ -117,8 +117,9 @@ shp_canton <- shp_commune %>%
 perimetre_cv <-
   read_xlsx("methodologie/filtres/perimetre_maritime_cantons.xlsx")
 
-
 # fusion
 shp_canton_littoral <- shp_canton %>%
   left_join(perimetre_cv, by = c("cv"))
 
+# export
+st_write(shp_canton_littoral, "methodologie/referentiels/FR_CANTON_LITTORAL.shp")
