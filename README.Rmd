@@ -24,7 +24,7 @@ Ces nomenclatures sont identiques à celles utilisées dans l'étude 2019, sur 2
 
 A partir d'une nomenclature des cantons-villes de l'Insee, une liste des zones "littorales" a été constituée, puis validée au niveau régional.
 
-```{r map_littoral, include=FALSE}
+```{r map_littoral, echo=FALSE}
 shp_canton_littoral <-
   st_read(here("methodologie/referentiels/FR_CANTON_LITTORAL.shp"), quiet = TRUE)
 
@@ -42,7 +42,7 @@ Selon les sources de données, certaines familles sont filtrées afin de ne les 
 
 Sont mobilisées :
 
-```{r sources, include=FALSE}
+```{r sources, echo=FALSE}
 tibble(
   source = c(
     "Emploi salarié Acoss",
@@ -75,7 +75,7 @@ tibble(
 
 En fonction des sources de données et des familles, des filtres peuvent être effectués pour restreindre uniquement sur le littoral.
 
-```{r sources_filtre, include=FALSE}
+```{r sources_filtre, echo=FALSE}
 tibble::tribble(
   ~ Famille,
   ~ Emploi.Acoss,
