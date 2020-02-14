@@ -18,7 +18,7 @@ sur 2018.
 A partir d’une nomenclature des cantons-villes de l’Insee, une liste des
 zones “littorales” a été constituée, puis validée au niveau régional.
 
-![](C:/Users/ITVR7420/Documents/README_files/figure-gfm/map_littoral-1.png)<!-- -->
+![](figures/map_littoral-1.png)<!-- -->
 
 Selon les sources de données, certaines familles sont filtrées afin de
 ne les prendre en compte que pour les zones littorales.
