@@ -3,6 +3,6 @@ rmarkdown::render(
   input = "README.Rmd",
   output_format = "github_document",
   output_file = "README.md",
-  output_dir = "~/",
+  output_dir = here::here(),
   intermediates_dir = "D://"
 )
