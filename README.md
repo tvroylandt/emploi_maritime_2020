@@ -18,7 +18,7 @@ sur 2018.
 A partir d’une nomenclature des cantons-villes de l’Insee, une liste des
 zones “littorales” a été constituée, puis validée au niveau régional.
 
-![](T:/DSEE/DOE/Métiers_secteurs/Portrait_stat/emploi_maritime_2020/README_files/figure-gfm/map_littoral-1.png)<!-- -->
+![](README_files/figure-gfm/map_littoral-1.png)<!-- -->
 
 Selon les sources de données, certaines familles sont filtrées afin de
 ne les prendre en compte que pour les zones littorales.
@@ -264,7 +264,7 @@ Offres
 
 <th style="text-align:left;">
 
-Offres.compétences
+Offres.competences
 
 </th>
 
@@ -572,7 +572,7 @@ R\&D et ingénierie maritime
 
 <td style="text-align:left;">
 
-X
+Littoral
 
 </td>
 

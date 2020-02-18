@@ -2,11 +2,18 @@
 .RData
 .Rproj.user
 
-
+/* donnees PE sensibles */
 doc/
 data/
 mail/
+
+/* fichiers init - pas utiles */
 methodologie/filtres_init
-methodologie/referentiels
+methodologie/referentiels/init
+methodologie/referentiels/shp
+
+/* outputs */
 output/
+
+/* programmes régionaux */
 prog/prog_regions

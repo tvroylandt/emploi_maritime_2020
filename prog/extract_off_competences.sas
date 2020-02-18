@@ -4,18 +4,17 @@
 
 * filtre de la table competence sur les métiers maritimes ;
 proc sql;
-	create table comp_offre_maritime_2019 as
+	create table comp_offre_maritime_2019_init as
 		select cats(a.KC_MOISSTATISTIQUE, "_", a.KC_OFFRE, "_", a.KC_NATUREENREGDETAILLEE_ID) as cle_ident,
 			  a.DC_ROMEV3_ID as rome, 
 			  a.DC_APPELATIONROMEV3_ID as aplrome,
 			  a.DN_NBOFFRENATUREDETAILLEE as nbroff, 
 			  b.famille_mer,
-			  b.type_metier,
-			  case 
-				when a.DC_REGION_ALE_ID in ("01" "02" "03" "04" "06") then "97"
-				else a.DC_REGION_ALE_ID
-			   end as region,
-			   a.DC_COMMUNE_ETABLISSEMENT_ID as commune,
+
+			  c.code_reg,
+			  c.code_dep,
+			  c.code_cv,
+			  d.littoral,
 
 			  a.DC_SPECIFICITE1 as specif1, 
 	          a.DC_SPECIFICITE2 as specif2, 
@@ -57,15 +56,72 @@ proc sql;
 	          a.DC_SPECIFICITE38 as specif38, 
 	          a.DC_SPECIFICITE39 as specif39, 
 	          a.DC_SPECIFICITE40 as specif40
-		from ntz_secu.doe_comp_offre_2019 as a left join userlib.perimetre_maritime_rome as b
-			on a.dc_romev3_id = b.rome and a.DC_APPELATIONROMEV3_ID = b.apl_rome
+
+		from ntz_secu.doe_comp_offre_2019 as a 
+			left join userlib.perimetre_maritime_rome as b
+				on a.dc_romev3_id = b.rome and a.DC_APPELATIONROMEV3_ID = b.apl_rome
+			left join userlib.passage_com_cv as c 
+				on a.DC_COMMUNE_ETABLISSEMENT_ID = c.code_com
+			left join userlib.perimetre_maritime_cantons as d
+				on c.code_cv = d.code_cv
+
 		where b.famille_mer ne ""
-		order by calculated cle_ident,
-				a.DC_ROMEV3_ID,
-				a.DC_APPELATIONROMEV3_ID,
-				b.famille_mer,
-				b.type_metier ,
-				calculated region ,
-				a.DC_COMMUNE_ETABLISSEMENT_ID,
-				a.DN_NBOFFRENATUREDETAILLEE;
+			and (d.littoral = "1" 
+				or (d.littoral = "0" 
+					and b.famille_mer not in ("Activités et Loisirs Littoraux",
+											"Hôtellerie-Restauration",
+											"Travaux en Mer")
+					)
+				);
+quit;
+
+* tri ;
+proc sql;
+	create table comp_offre_maritime_2019_init as
+		select *
+		from comp_offre_maritime_2019_init
+		order by cle_ident,
+				rome,
+				aplrome,
+				famille_mer,
+				code_reg,
+				code_dep,
+				code_cv,
+				littoral,
+				nbroff ;
+quit;
+
+* transposition ;
+proc transpose data = comp_offre_maritime_2019_init out = comp_offre_maritime_2019_tr;
+	by 
+		cle_ident
+		rome
+		aplrome
+		famille_mer
+		code_reg
+		code_dep
+		code_cv
+		littoral
+		nbroff ;
+	var SPECIF1--SPECIF40;
+run;
+
+* filtre et regroupement;
+proc sql;
+	create table comp_offre_maritime_2019 as
+		select famille_mer,
+				code_reg,
+				code_dep,
+				code_cv,
+				littoral,
+				col1 as comp,
+				sum(nbroff) as nb_off
+		from comp_offre_maritime_2019_tr
+		where col1 ne "000000"
+		group by famille_mer,
+				code_reg,
+				code_dep,
+				code_cv,
+				littoral,
+				comp ;
 quit;

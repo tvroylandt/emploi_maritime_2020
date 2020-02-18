@@ -26,7 +26,7 @@ A partir d'une nomenclature des cantons-villes de l'Insee, une liste des zones "
 
 ```{r map_littoral, echo=FALSE}
 shp_canton_littoral <-
-  st_read(here("methodologie/referentiels/FR_CANTON_LITTORAL.shp"), quiet = TRUE)
+  st_read(here("methodologie/referentiels/shp/FR_CANTON_LITTORAL.shp"), quiet = TRUE)
 
 ggplot(shp_canton_littoral) +
   geom_sf(aes(fill = littoral),
@@ -81,7 +81,7 @@ tibble::tribble(
   ~ Emploi.Acoss,
   ~ DPAE,
   ~ Offres,
-  ~ Offres.compétences,
+  ~ Offres.competences,
   ~ DEFM,
   ~ Formation,
   "Activités et loisirs littoraux",
@@ -127,7 +127,7 @@ tibble::tribble(
   "X",
   "X",
   "R&D et ingénierie maritime",
-  "X",
+  "Littoral",
   "X",
   "X",
   "X",

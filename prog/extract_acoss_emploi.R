@@ -20,22 +20,16 @@ df_acoss_init <-
 
 # Mise en forme -----------------------------------------------------------
 df_acoss_propre <- df_acoss_init %>%
-  mutate(
-    code_com = str_sub(commune, 1, 5),
-    naf = paste0(str_sub(ape, 1, 2), str_sub(ape, 4, 6)),
-    code_dep = if_else(
-      str_sub(code_com, 1, 2) == "97",
-      str_sub(code_com, 1, 3),
-      str_sub(code_com, 1, 2)
-    )
-  ) %>%
+  mutate(code_com = str_sub(commune, 1, 5),
+         naf = paste0(str_sub(ape, 1, 2), str_sub(ape, 4, 6))) %>%
   pivot_longer(
     cols = c(starts_with("nb_"), starts_with("eff")),
     names_to = c(".value", "annee"),
     names_pattern = "(.*)(.{4}$)"
   ) %>%
-  select(annee, code_dep, code_com, naf, nb_etab, eff) %>%
-  replace_na(list(nb_etab = 0, eff = 0))
+  select(annee, code_com, naf, nb_etab, eff) %>%
+  replace_na(list(nb_etab = 0, eff = 0)) %>%
+  rename(nb_eff = eff)
 
 # Familles de la mer ------------------------------------------------------
 perimetre_maritime_naf <-
@@ -47,17 +41,8 @@ df_acoss_maritime_com <- df_acoss_propre %>%
 
 # Cantons littoral --------------------------------------------------------
 # Table de passage commune-cv - en historique
-# !!! POUR L'INSTANT TABLE INITALE - PROVISOIRE !!!
-passage_commune_cv <-
-  read_xls("methodologie/referentiels/table-appartenance-geo-communes-19.xls",
-           skip = 5) %>%
-  select(CODGEO, CV, REG, DEP) %>%
-  rename_all(tolower)
-
-# Reste
-df_acoss_maritime_com %>%
-  anti_join(passage_commune_cv, by = c("code_com" = "codgeo")) %>%
-  distinct(code_com)
+passage_com_cv <-
+  read_xlsx("methodologie/referentiels/passage_com_cv.xlsx")
 
 # Périmètre CV
 perimetre_cv <-
@@ -65,14 +50,25 @@ perimetre_cv <-
 
 # Jointure et filtre
 df_acoss_maritime <- df_acoss_maritime_com %>%
-  left_join(passage_commune_cv, by = c("code_com" = "codgeo")) %>%
-  group_by(code_dep, cv, naf, famille_mer, type_metier) %>%
+  left_join(
+    passage_com_cv %>% select(code_com, code_cv, code_reg, code_dep),
+    by = c("code_com")
+  ) %>%
+  group_by(annee, code_reg, code_dep, code_cv, naf, famille_mer) %>%
   summarise(nb_etab = sum(nb_etab),
-            eff = sum(eff)) %>%
+            nb_eff = sum(nb_eff)) %>%
   ungroup() %>%
-  left_join(perimetre_cv, by = c("cv")) %>%
-  filter(type_metier == "Coeur" |
-           (littoral == "1" & type_metier == "Transverse"))
+  left_join(perimetre_cv %>% select(code_cv, littoral), by = c("code_cv")) %>%
+  filter((littoral == "1" |
+            (
+              littoral == "0" &
+                !famille_mer %in% c(
+                  "Activités et Loisirs Littoraux",
+                  "Hôtellerie-Restauration",
+                  "Travaux en Mer"
+                )
+            )) &
+           annee %in% c("2017", "2018"))
 
 # Export ------------------------------------------------------------------
 write_rds(df_acoss_maritime, "data/df_acoss_maritime.rds")
