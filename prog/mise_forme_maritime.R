@@ -77,18 +77,6 @@ df_off_full <- df_off %>%
             nb_off_durable = sum(`1`)) %>%
   ungroup()
 
-# Nombre d'offres
-nb_off_evol <- df_off %>%
-  group_by(annee) %>%
-  summarise(nb_off_tot = sum(nb_off_tot))
-
-# Offres par famille
-nb_off_famille <- df_off %>%
-  filter(annee == 2019) %>%
-  group_by(famille_mer) %>%
-  summarise(nb_off_tot = sum(nb_off_tot)) %>%
-  mutate(part_off_tot = round(nb_off_tot / sum(nb_off_tot) * 100, 0))
-
 # Top tous métiers
 nb_off_top10_global <- df_off %>%
   filter(annee == 2019) %>%
@@ -117,32 +105,6 @@ df_defm <- read_sas("data/defm_maritime.sas7bdat") %>%
   group_by(annee, code_reg, lib_reg, code_dep, famille_mer) %>%
   summarise_at(vars(starts_with("nb")), sum) %>%
   ungroup()
-
-# Evol
-nb_defm_evol <- df_defm %>%
-  group_by(annee) %>%
-  summarise(nb_defm_tot = sum(nb_defm_tot))
-
-# DEFM par région
-nb_defm_reg <- df_defm %>%
-  filter(annee == 2019) %>%
-  group_by(code_reg, lib_reg) %>%
-  summarise(nb_defm_tot = sum(nb_defm_tot))
-
-# Part par famille et région
-nb_defm_famille_reg <- df_defm %>%
-  filter(annee == 2019) %>%
-  group_by(code_reg, lib_reg, famille_mer) %>%
-  summarise(nb_defm_tot = sum(nb_defm_tot)) %>%
-  group_by(code_reg, lib_reg) %>%
-  mutate(part_defm_tot = round(nb_defm_tot / sum(nb_defm_tot) * 100, 0)) %>%
-  ungroup()
-
-# DEFM par famille
-nb_defm_famille <- df_defm %>%
-  filter(annee == 2019) %>%
-  group_by(famille_mer) %>%
-  summarise(nb_defm_tot = sum(nb_defm_tot))
 
 # Profil
 nb_defm_profil <- df_defm %>%
@@ -200,26 +162,6 @@ df_dpae_full <- df_dpae %>%
             nb_dpae_durable = sum(nb_dpae_durable)) %>%
   ungroup()
 
-# Evol DPAE
-nb_dpae_evol <- df_dpae %>%
-  group_by(annee) %>%
-  summarise(nb_dpae = sum(nb_dpae))
-
-# DPAE par famille
-nb_dpae_famille <- df_dpae %>%
-  group_by(famille_mer) %>%
-  summarise(nb_dpae = sum(nb_dpae))
-
-# DPAE par famille et région
-nb_dpae_famille_reg <- df_dpae %>%
-  filter(
-    annee == 2019 &
-      !famille_mer %in% c("Activités et Loisirs Littoraux", "Hôtellerie-Restauration")
-  ) %>%
-  group_by(code_reg, lib_reg, famille_mer) %>%
-  summarise(nb_dpae = sum(nb_dpae)) %>%
-  ungroup()
-
 # DPAE par famille et région - littoral
 nb_dpae_famille_reg_littoral <- df_dpae %>%
   filter(annee == 2019 & littoral == "1") %>%
@@ -230,53 +172,27 @@ nb_dpae_famille_reg_littoral <- df_dpae %>%
   filter(part_dpae > 10) %>%
   ungroup()
 
-# DPAE par région
-nb_dpae_reg <- df_dpae %>%
-  filter(annee == 2019) %>%
-  group_by(code_reg, lib_reg) %>%
-  summarise(nb_dpae = sum(nb_dpae))
-
 # Emploi ------------------------------------------------------------------
+# /!\ Pour les jointures on décale d'une année mais on est bien sur 2017 et 2018
 df_emploi <- read_rds("data/df_acoss_maritime.rds") %>%
   left_join(ref_reg, by = "code_reg") %>%
-  mutate(annee = as.numeric(annee)) %>%
-  group_by(annee, code_reg, lib_reg, code_dep, famille_mer) %>%
+  mutate(annee = as.numeric(annee),
+         annee_ref = annee,
+         annee = annee + 1) %>%
+  group_by(annee, annee_ref, code_reg, lib_reg, code_dep, famille_mer) %>%
   summarise(nb_etab = sum(nb_etab),
             nb_eff = sum(nb_eff)) %>%
   ungroup()
 
-# Evol
-nb_emploi_evol <- df_emploi %>%
-  mutate(gde_famille_mer = if_else(
-    famille_mer %in% c("Activités et Loisirs Littoraux", "Hôtellerie-Restauration"),
-    "Tourisme",
-    "Hors tourisme"
-  )) %>%
-  group_by(annee, gde_famille_mer) %>%
-  summarise(nb_etab = sum(nb_etab),
-            nb_eff = sum(nb_eff))
-
 # Evol par region
 nb_emploi_evol_reg_htourisme <- df_emploi %>%
   filter(!famille_mer %in% c("Activités et Loisirs Littoraux", "Hôtellerie-Restauration")) %>%
-  group_by(annee, code_reg, lib_reg) %>%
+  group_by(annee_ref, code_reg, lib_reg) %>%
   summarise(nb_eff = sum(nb_eff)) %>%
-  pivot_wider(names_from = annee_ref_emploi,  values_from = nb_eff) %>%
+  pivot_wider(names_from = annee_ref,  values_from = nb_eff) %>%
   ungroup() %>%
   mutate(evol = round((`2018` / `2017` - 1) * 100, 1),
          part_eff = round(`2018` / sum(`2018`) * 100, 1))
-
-# Par famille et region
-nb_emploi_famille_reg_htourisme <- df_emploi %>%
-  filter(
-    annee == 2018 &
-      !famille_mer %in% c("Activités et Loisirs Littoraux", "Hôtellerie-Restauration")
-  ) %>%
-  group_by(code_reg, lib_reg, famille_mer) %>%
-  summarise(nb_eff = sum(nb_eff)) %>%
-  group_by(code_reg, lib_reg) %>%
-  mutate(part_eff = round(nb_eff / sum(nb_eff) * 100, 0)) %>%
-  ungroup()
 
 # Formation ---------------------------------------------------------------
 df_formation <- read_sas("data/formation_maritime.sas7bdat") %>%
@@ -286,7 +202,6 @@ df_formation <- read_sas("data/formation_maritime.sas7bdat") %>%
 df_formation_full <- df_formation %>%
   mutate(annee = 2019) %>%
   group_by(annee,
-           annee_ref_formation,
            code_reg,
            lib_reg,
            code_dep,
@@ -299,14 +214,6 @@ nb_formation_type <- df_formation %>%
   group_by(type_formation) %>%
   summarise(nb_formation = sum(nb_formation),
             montants = sum(montants, na.rm = TRUE))
-
-# par region et famille
-nb_formation_reg_famille <- df_formation %>%
-  group_by(code_reg, lib_reg, famille_mer) %>%
-  summarise(nb_formation = sum(nb_formation)) %>%
-  group_by(code_reg, lib_reg) %>%
-  mutate(part_formation = round(nb_formation / sum(nb_formation) * 100 , 0)) %>%
-  ungroup()
 
 # Base totale -------------------------------------------------------------
 # Jointure
@@ -342,14 +249,68 @@ df_base_maritime_dep_famille <- df_off_full %>%
 
 # Par région et famille maritime
 df_base_maritime_reg_famille <- df_base_maritime_dep_famille %>%
-  group_by(annee, code_reg, famille_mer) %>%
+  group_by(annee, code_reg, lib_reg, famille_mer) %>%
   summarise_at(vars(starts_with("nb")), sum) %>%
   ungroup()
 
-# Export ------------------------------------------------------------------
-write_xlsx(list("Competence_top3" = df_off_comp_top3),
-           "output/resultats_maritime_2019.xlsx")
+# Ventilations ------------------------------------------------------------
+# Année
+stat_annee <- df_base_maritime_reg_famille %>%
+  group_by(annee) %>%
+  summarise_at(vars(nb_off_tot, nb_defm_tot, nb_dpae, nb_eff, nb_formation),
+               sum) %>%
+  ungroup()
 
+# Famille
+stat_famille <- df_base_maritime_reg_famille %>%
+  filter(annee == 2019) %>%
+  group_by(famille_mer) %>%
+  summarise_at(vars(nb_off_tot, nb_defm_tot, nb_dpae, nb_eff, nb_formation),
+               sum) %>%
+  ungroup()
+
+# Région
+stat_region <- df_base_maritime_reg_famille %>%
+  filter(annee == 2019) %>%
+  group_by(code_reg, lib_reg) %>%
+  summarise_at(vars(nb_off_tot, nb_defm_tot, nb_dpae, nb_eff, nb_formation),
+               sum) %>%
+  ungroup()
+
+# Famille-région
+stat_famille_region <- df_base_maritime_reg_famille %>%
+  filter(annee == 2019) %>%
+  select(
+    code_reg,
+    lib_reg,
+    famille_mer,
+    nb_off_tot,
+    nb_defm_tot,
+    nb_dpae,
+    nb_eff,
+    nb_formation
+  )
+
+# Export ------------------------------------------------------------------
+# Ventilations
+write_xlsx(
+  list(
+    "Stat - annee" = stat_annee,
+    "Stat - famille" = stat_famille,
+    "Stat - région" = stat_region,
+    "Stat - famille - région" = stat_famille_region,
+    "Competence_top3" = df_off_comp_top3,
+    "Off - top10" = nb_off_top10_global,
+    "Off - top10 ss tourisme" = nb_off_top10_htourisme,
+    "DE - profil" = nb_defm_profil,
+    "DPAE - famille-region littoral" = nb_dpae_famille_reg_littoral,
+    "Emploi - evol region ss tour" = nb_emploi_evol_reg_htourisme,
+    "Formation - type" = nb_formation_type
+  ),
+  "output/resultats_maritime_2019.xlsx"
+)
+
+# Bases globales
 write_xlsx(df_base_maritime_dep_famille,
            "output/base_maritime_dep.xlsx")
 

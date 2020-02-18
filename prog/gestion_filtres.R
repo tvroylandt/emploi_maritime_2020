@@ -85,6 +85,20 @@ perimetre_formacode <-
     col_types = c("text", "skip", "skip", "skip", "text"),
     col_names = c("formacode", "famille_mer"),
     skip = 1
+  ) %>%
+  mutate(
+    famille_mer = fct_recode(
+      famille_mer,
+      "Services Portuaires et Nautiques" = "Services portuaires et nautiques",
+      "Pêches et Cultures Marines" = "Pêches et cultures marines",
+      "Activités et Loisirs Littoraux" = "Activités et loisirs littoraux",
+      "Transformation des Produits de la Mer" = "Transformation des produits de la mer",
+      "Construction et Maintenance Navale" = "Construction et maintenance navale",
+      "Défense et Administrations Maritimes" = "Défense et administrations maritimes",
+      "R&D et Ingénierie Maritime" = "R&D et ingénierie maritime",
+      "Personnel embarqué" = "Personnel embarqué",
+      "Hôtellerie-Restauration" = "Hôtellerie-restauration"
+    )
   )
 
 write_xlsx(perimetre_formacode,
@@ -105,15 +119,22 @@ passage_com_cv <-
   )
 
 # gerer l'historique + PLM
-echecs_cog <- read_xlsx("methodologie/referentiels/init/echecs_cog.xlsx") %>% 
-  mutate(code_cv = case_when(str_sub(code_com, 1, 2) == "75" ~ "75ZZ",
-                             str_sub(code_com, 1, 3) == "132" ~ "1398" ,
-                             str_sub(code_com, 1, 4) == "6938" ~ "69ZZ"),
-         code_dep = str_sub(code_cv, 1, 2),
-         code_reg = fct_recode(code_dep,
-                               "11" = "75",
-                               "84" = "69",
-                               "93" = "13")) %>% 
+echecs_cog <-
+  read_xlsx("methodologie/referentiels/init/echecs_cog.xlsx") %>%
+  mutate(
+    code_cv = case_when(
+      str_sub(code_com, 1, 2) == "75" ~ "75ZZ",
+      str_sub(code_com, 1, 3) == "132" ~ "1398" ,
+      str_sub(code_com, 1, 4) == "6938" ~ "69ZZ"
+    ),
+    code_dep = str_sub(code_cv, 1, 2),
+    code_reg = fct_recode(
+      code_dep,
+      "11" = "75",
+      "84" = "69",
+      "93" = "13"
+    )
+  ) %>%
   select(-eff)
 
 # pour jointer sur les vieilles tables de passage
@@ -124,7 +145,7 @@ join_passage <- function(data, deb, fin) {
   
   data %>%
     left_join(get(nom_df), by = c("code_com2" = paste0("cod", deb))) %>%
-    mutate(code_com2 = if_else(is.na(!!sym(cod_fin)), code_com2, !!sym(cod_fin))) %>%
+    mutate(code_com2 = if_else(is.na(!!sym(cod_fin)), code_com2,!!sym(cod_fin))) %>%
     select(code_com, code_com2)
 }
 
@@ -151,11 +172,11 @@ echecs_cog_recode <- echecs_cog %>%
   left_join(passage_com_cv, by = c("code_com2" = "code_com")) %>%
   filter(!is.na(code_cv)) %>%
   select(-code_com2) %>%
-  bind_rows(echecs_cog %>% 
+  bind_rows(echecs_cog %>%
               filter(!is.na(code_cv)))
 
 # et on rejointe
-passage_com_cv <- passage_com_cv %>% 
+passage_com_cv <- passage_com_cv %>%
   bind_rows(echecs_cog_recode)
 
 # sauvegarde
