@@ -81,7 +81,7 @@ cultures marines
 
 <td style="text-align:left;">
 
-2019
+2018
 
 </td>
 
@@ -578,19 +578,19 @@ Littoral
 
 <td style="text-align:left;">
 
-X
+Littoral
 
 </td>
 
 <td style="text-align:left;">
 
-X
+Littoral
 
 </td>
 
 <td style="text-align:left;">
 
-X
+Littoral
 
 </td>
 

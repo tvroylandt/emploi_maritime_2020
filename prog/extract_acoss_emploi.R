@@ -65,7 +65,8 @@ df_acoss_maritime <- df_acoss_maritime_com %>%
                 !famille_mer %in% c(
                   "Activités et Loisirs Littoraux",
                   "Hôtellerie-Restauration",
-                  "Travaux en Mer"
+                  "Travaux en Mer",
+                  "R&D et Ingénierie Maritime"
                 )
             )) &
            annee %in% c("2017", "2018"))

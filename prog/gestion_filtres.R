@@ -201,7 +201,21 @@ perimetre_cv <-
 
 # fusion
 shp_canton_littoral <- shp_canton %>%
+  select(code_cv) %>% 
   left_join(perimetre_cv, by = c("code_cv"))
+
+# comparaison bassin
+shp_bassin <- st_read("methodologie/referentiels/shp/FR_BASSIN_BMO_DOM_IDF_2019.shp") %>%
+  filter(zoom_df == "0")
+
+ggplot(shp_canton_littoral) +
+  geom_sf(aes(fill = littoral)) +
+  geom_sf_text(aes(label = code_cv)) +
+  geom_sf(data = shp_bassin,
+          color = "blue",
+          alpha = 0) +
+  geom_sf_text(data = shp_bassin, aes(label = cd_bss_), color = "blue") +
+  theme_void()
 
 # export
 st_write(

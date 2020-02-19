@@ -136,8 +136,6 @@ df_dpae <- read_sas("data/dpae_maritime.sas7bdat") %>%
            code_reg,
            lib_reg,
            code_dep,
-           code_cv,
-           littoral,
            ind_durable) %>%
   summarise(nb_dpae = sum(nb_dpae)) %>%
   ungroup() %>%
@@ -150,27 +148,6 @@ df_dpae <- read_sas("data/dpae_maritime.sas7bdat") %>%
          annee = as.numeric(annee)) %>%
   select(-`0`) %>%
   rename(nb_dpae_durable = `1`)
-
-# DPAE full
-df_dpae_full <- df_dpae %>%
-  group_by(annee,
-           famille_mer,
-           code_reg,
-           lib_reg,
-           code_dep) %>%
-  summarise(nb_dpae = sum(nb_dpae),
-            nb_dpae_durable = sum(nb_dpae_durable)) %>%
-  ungroup()
-
-# DPAE par famille et région - littoral
-nb_dpae_famille_reg_littoral <- df_dpae %>%
-  filter(annee == 2019 & littoral == "1") %>%
-  group_by(code_reg, lib_reg, famille_mer) %>%
-  summarise(nb_dpae = sum(nb_dpae)) %>%
-  group_by(code_reg) %>%
-  mutate(part_dpae = round(nb_dpae / sum(nb_dpae) * 100, 0)) %>%
-  filter(part_dpae > 10) %>%
-  ungroup()
 
 # Emploi ------------------------------------------------------------------
 # /!\ Pour les jointures on décale d'une année mais on est bien sur 2017 et 2018
@@ -224,7 +201,7 @@ df_base_maritime_dep_famille <- df_off_full %>%
                    "lib_reg",
                    "code_dep",
                    "famille_mer")) %>%
-  full_join(df_dpae_full,
+  full_join(df_dpae,
             by = c("annee",
                    "code_reg",
                    "lib_reg",
@@ -303,7 +280,6 @@ write_xlsx(
     "Off - top10" = nb_off_top10_global,
     "Off - top10 ss tourisme" = nb_off_top10_htourisme,
     "DE - profil" = nb_defm_profil,
-    "DPAE - famille-region littoral" = nb_dpae_famille_reg_littoral,
     "Emploi - evol region ss tour" = nb_emploi_evol_reg_htourisme,
     "Formation - type" = nb_formation_type
   ),

@@ -61,7 +61,7 @@ tibble(
     ""
   ),
   temporalite = c(
-    "2019",
+    "2018",
     "2019",
     "2019",
     "2019",
@@ -128,9 +128,9 @@ tibble::tribble(
   "X",
   "R&D et ingénierie maritime",
   "Littoral",
-  "X",
-  "X",
-  "X",
+  "Littoral",
+  "Littoral",
+  "Littoral",
   "X",
   "X",
   "Services portuaires et nautiques",

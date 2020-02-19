@@ -70,7 +70,8 @@ proc sql;
 				or (d.littoral = "0" 
 					and b.famille_mer not in ("Activités et Loisirs Littoraux",
 											"Hôtellerie-Restauration",
-											"Travaux en Mer")
+											"Travaux en Mer",
+											"R&D et Ingénierie Maritime")
 					)
 				);
 quit;
