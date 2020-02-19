@@ -161,6 +161,11 @@ df_emploi <- read_rds("data/df_acoss_maritime.rds") %>%
             nb_eff = sum(nb_eff)) %>%
   ungroup()
 
+# Nb structures
+df_emploi %>% 
+  group_by(annee) %>% 
+  summarise(nb_etab = sum(nb_etab))
+
 # Evol par region
 nb_emploi_evol_reg_htourisme <- df_emploi %>%
   filter(!famille_mer %in% c("Activités et Loisirs Littoraux", "Hôtellerie-Restauration")) %>%

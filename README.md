@@ -748,3 +748,12 @@ X
 </tbody>
 
 </table>
+
+## Fonctionnement
+
+Tous les programmes dans `prog/` commençant par *extract\_* servent à
+récupérer les données des SI (STMT et SISP). Les filtres sont à charger
+avant et sont disponibles dans `methodologie/filtres`.
+
+Un programme R permet ensuite de faire l’assemblage des différentes
+tables.
