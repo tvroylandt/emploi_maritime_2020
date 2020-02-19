@@ -73,9 +73,8 @@ Emploi salarié Acoss
 
 <td style="text-align:left;">
 
-hors Mayotte où la population-mère BMO prend le relai + hors Défense et
-administation maritimes + de fait hors MSA, ce qui sous-estime Pêche et
-cultures marines
+Hors Défense et administation maritimes + de fait hors MSA, ce qui
+sous-estime Pêche et cultures marines
 
 </td>
 
